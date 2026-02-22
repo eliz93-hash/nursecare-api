@@ -6,128 +6,45 @@
   <title>NurseCare AI — Care Plan Generator</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: Arial, sans-serif;
-      background: #f0f4f8;
-      color: #333;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-      color: #2c7a7b;
-      margin-bottom: 8px;
-      font-size: 1.6rem;
-    }
-    p.subtitle {
-      text-align: center;
-      color: #555;
-      margin-bottom: 24px;
-      font-size: 0.95rem;
-    }
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      max-width: 680px;
-      margin: 0 auto 20px auto;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 6px;
-      color: #2c7a7b;
-    }
-    input, textarea, select {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 1rem;
-      margin-bottom: 16px;
-    }
+    body { font-family: Arial, sans-serif; background: #f0f4f8; color: #333; padding: 20px; }
+    h1 { text-align: center; color: #2c7a7b; margin-bottom: 8px; font-size: 1.6rem; }
+    p.subtitle { text-align: center; color: #555; margin-bottom: 24px; font-size: 0.95rem; }
+    .card { background: white; border-radius: 12px; padding: 20px; max-width: 680px; margin: 0 auto 20px auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    label { display: block; font-weight: bold; margin-bottom: 6px; color: #2c7a7b; }
+    input, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; margin-bottom: 16px; }
     textarea { height: 100px; resize: vertical; }
-    button {
-      width: 100%;
-      padding: 14px;
-      background: #2c7a7b;
-      color: white;
-      font-size: 1.1rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    button:hover { background: #235f60; }
+    button { width: 100%; padding: 14px; background: #2c7a7b; color: white; font-size: 1.1rem; border: none; border-radius: 8px; cursor: pointer; }
     button:disabled { background: #aaa; cursor: not-allowed; }
-    #result {
-      display: none;
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      max-width: 680px;
-      margin: 0 auto;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      white-space: pre-wrap;
-      line-height: 1.6;
-    }
-    #result h2 {
-      color: #2c7a7b;
-      margin-bottom: 12px;
-    }
-    #error {
-      display: none;
-      background: #ffe0e0;
-      border: 1px solid #f99;
-      border-radius: 8px;
-      padding: 14px;
-      max-width: 680px;
-      margin: 0 auto 16px auto;
-      color: #c00;
-    }
-    .spinner {
-      display: none;
-      text-align: center;
-      padding: 20px;
-      font-size: 1rem;
-      color: #2c7a7b;
-    }
+    #result { display: none; background: white; border-radius: 12px; padding: 20px; max-width: 680px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); white-space: pre-wrap; line-height: 1.6; }
+    #result h2 { color: #2c7a7b; margin-bottom: 12px; }
+    #error { display: none; background: #ffe0e0; border: 1px solid #f99; border-radius: 8px; padding: 14px; max-width: 680px; margin: 0 auto 16px auto; color: #c00; }
+    .spinner { display: none; text-align: center; padding: 20px; font-size: 1rem; color: #2c7a7b; }
   </style>
 </head>
 <body>
-
   <h1>🩺 NurseCare AI</h1>
   <p class="subtitle">AI-powered nursing care plan generator</p>
-
   <div class="card">
     <label>Patient Name</label>
     <input type="text" id="patientName" placeholder="e.g. John Doe" />
-
     <label>Age</label>
     <input type="number" id="age" placeholder="e.g. 65" />
-
     <label>Diagnosis / Medical Condition</label>
     <input type="text" id="diagnosis" placeholder="e.g. Type 2 Diabetes, Hypertension" />
-
     <label>Current Symptoms</label>
     <textarea id="symptoms" placeholder="Describe current symptoms..."></textarea>
-
     <label>Allergies (if any)</label>
     <input type="text" id="allergies" placeholder="e.g. Penicillin, Sulfa drugs" />
-
     <label>Additional Notes</label>
     <textarea id="notes" placeholder="Any other relevant information..."></textarea>
-
     <button onclick="generatePlan()" id="generateBtn">Generate Care Plan</button>
   </div>
-
   <div id="error"></div>
   <div class="spinner" id="spinner">⏳ Generating care plan, please wait...</div>
-
   <div id="result">
     <h2>📋 Care Plan</h2>
     <div id="planContent"></div>
   </div>
-
   <script>
     async function generatePlan() {
       const name = document.getElementById('patientName').value.trim();
@@ -136,30 +53,19 @@
       const symptoms = document.getElementById('symptoms').value.trim();
       const allergies = document.getElementById('allergies').value.trim();
       const notes = document.getElementById('notes').value.trim();
-
-      if (!diagnosis) {
-        showError('Please enter at least a diagnosis.');
-        return;
-      }
-
+      if (!diagnosis) { showError('Please enter at least a diagnosis.'); return; }
       document.getElementById('error').style.display = 'none';
       document.getElementById('result').style.display = 'none';
       document.getElementById('spinner').style.display = 'block';
       document.getElementById('generateBtn').disabled = true;
-
       try {
         const response = await fetch('/.netlify/functions/generateCarePlan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, age, diagnosis, symptoms, allergies, notes })
         });
-
         const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Something went wrong');
-        }
-
+        if (!response.ok) throw new Error(data.error || 'Something went wrong');
         document.getElementById('planContent').textContent = data.carePlan;
         document.getElementById('result').style.display = 'block';
       } catch (err) {
@@ -169,13 +75,11 @@
         document.getElementById('generateBtn').disabled = false;
       }
     }
-
     function showError(msg) {
       const el = document.getElementById('error');
       el.textContent = msg;
       el.style.display = 'block';
     }
   </script>
-
 </body>
 </html>
