@@ -1,22 +1,29 @@
 exports.handler = async function (event) {
-
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: JSON.stringify({ error: "Method not allowed" }) };
   }
 
-  let diagnosis;
+  let body;
   try {
-    const body = JSON.parse(event.body);
-    diagnosis = body.diagnosis;
+    body = JSON.parse(event.body);
   } catch {
     return { statusCode: 400, body: JSON.stringify({ error: "Invalid request body" }) };
   }
+
+  const { name, age, diagnosis, symptoms, allergies, notes } = body;
 
   if (!diagnosis) {
     return { statusCode: 400, body: JSON.stringify({ error: "Missing diagnosis" }) };
   }
 
-  const prompt = `You are an expert nursing educator. Generate a complete NANDA-I nursing care plan for the diagnosis: "${diagnosis}". Respond ONLY with a valid JSON object, no markdown, no extra text. Use exactly this structure: { "relatedTo": "string", "evidencedBy": ["s1","s2","s3","s4","s5"], "goals": ["goal1","goal2","goal3"], "interventions": [{"action":"intervention 1","rationale":"rationale 1"},{"action":"intervention 2","rationale":"rationale 2"},{"action":"intervention 3","rationale":"rationale 3"},{"action":"intervention 4","rationale":"rationale 4"},{"action":"intervention 5","rationale":"rationale 5"},{"action":"intervention 6","rationale":"rationale 6"}], "evaluation": "string", "priority": "high" } Priority must be one of: high, medium, or low.`;
+  const prompt = `You are an expert nursing educator. Generate a detailed nursing care plan for:
+Patient: ${name || "Unknown"}, Age: ${age || "Unknown"}
+Diagnosis: ${diagnosis}
+Symptoms: ${symptoms || "None provided"}
+Allergies: ${allergies || "None"}
+Notes: ${notes || "None"}
+
+Write a clear, detailed care plan including: nursing diagnosis, goals, interventions with rationale, and evaluation criteria.`;
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -40,14 +47,12 @@ exports.handler = async function (event) {
     }
 
     const data = await response.json();
-    const text = data.content.map((c) => c.text || "").join("");
-    const clean = text.replace(/```json|```/g, "").trim();
-    const plan = JSON.parse(clean);
+    const carePlan = data.content.map((c) => c.text || "").join("");
 
     return {
       statusCode: 200,
       headers: { "Access-Control-Allow-Origin": "*" },
-      body: JSON.stringify({ plan }),
+      body: JSON.stringify({ carePlan }),
     };
 
   } catch (err) {
