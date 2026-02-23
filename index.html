@@ -59,7 +59,7 @@
       document.getElementById('spinner').style.display = 'block';
       document.getElementById('generateBtn').disabled = true;
       try {
-        const response = await fetch('/.netlify/functions/generateCarePlan', {
+        const response = await fetch('/api/generateCarePlan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, age, diagnosis, symptoms, allergies, notes })
