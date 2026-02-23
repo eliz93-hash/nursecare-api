@@ -9,6 +9,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Missing diagnosis" });
   }
 
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: "API key not configured" });
+  }
+
   const prompt = `You are an expert nursing educator. Generate a detailed nursing care plan for:
 Patient: ${name || "Unknown"}, Age: ${age || "Unknown"}
 Diagnosis: ${diagnosis}
@@ -23,7 +28,7 @@ Write a clear, detailed care plan including: nursing diagnosis, goals, intervent
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
+        "x-api-key": apiKey,
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
@@ -33,11 +38,16 @@ Write a clear, detailed care plan including: nursing diagnosis, goals, intervent
       }),
     });
 
+    if (!response.ok) {
+      const errText = await response.text();
+      return res.status(502).json({ error: "AI error: " + errText });
+    }
+
     const data = await response.json();
     const carePlan = data.content.map((c) => c.text || "").join("");
     return res.status(200).json({ carePlan });
 
   } catch (err) {
-    return res.status(500).json({ error: "Failed to generate care plan." });
+    return res.status(500).json({ error: "Failed: " + err.message });
   }
 }
